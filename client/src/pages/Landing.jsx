@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { API_BASE } from '../lib/api.js';
 import { useEffect, useMemo, useState } from 'react';
 import { geoNaturalEarth1, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
@@ -87,7 +88,7 @@ function TopStories() {
   const [open, setOpen] = useState(null);
 
   useEffect(() => {
-    fetch('/api/market/news').then((r) => r.json()).then(setNews).catch(() => setNews([]));
+    fetch(`${API_BASE}/api/market/news`).then((r) => r.json()).then(setNews).catch(() => setNews([]));
   }, []);
 
   if (!news || news.length === 0) return null;
@@ -198,10 +199,10 @@ function MarketHighlights() {
   const [returns, setReturns] = useState([]);
 
   useEffect(() => {
-    fetch('/api/market/snapshot').then((r) => r.json()).then(setSnapshot).catch(() => {});
-    fetch('/api/market/top-returns').then((r) => r.json()).then(setReturns).catch(() => {});
+    fetch(`${API_BASE}/api/market/snapshot`).then((r) => r.json()).then(setSnapshot).catch(() => {});
+    fetch(`${API_BASE}/api/market/top-returns`).then((r) => r.json()).then(setReturns).catch(() => {});
     const i = setInterval(() => {
-      fetch('/api/market/snapshot').then((r) => r.json()).then(setSnapshot).catch(() => {});
+      fetch(`${API_BASE}/api/market/snapshot`).then((r) => r.json()).then(setSnapshot).catch(() => {});
     }, 10000);
     return () => clearInterval(i);
   }, []);
@@ -384,7 +385,7 @@ function InflationMap() {
       .then((r) => r.json())
       .then((topo) => setFeatures(feature(topo, topo.objects.countries).features))
       .catch(() => {});
-    fetch('/api/macro/inflation')
+    fetch(`${API_BASE}/api/macro/inflation`)
       .then((r) => r.json())
       .then(setInflation)
       .catch(() => {});
@@ -733,7 +734,7 @@ export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const load = () => fetch('/api/market/snapshot').then((r) => r.json()).then(setSnapshot).catch(() => {});
+    const load = () => fetch(`${API_BASE}/api/market/snapshot`).then((r) => r.json()).then(setSnapshot).catch(() => {});
     load();
     const i = setInterval(load, 4000);
     return () => clearInterval(i);
