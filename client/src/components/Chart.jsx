@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createChart, CrosshairMode, LineStyle } from 'lightweight-charts';
 import CompanyLogo, { useCompanyProfile } from './CompanyLogo.jsx';
+import { API_BASE } from '../lib/api.js';
 
 const TIMEFRAMES = ['1D', '1W', '1M', '3M', '1Y'];
 
@@ -104,7 +105,7 @@ export default function Chart({ symbol }) {
   useEffect(() => {
     if (!symbol || !candleRef.current) return;
     let cancelled = false;
-    fetch(`/api/market/history/${symbol}?timeframe=${tf}`)
+    fetch(`${API_BASE}/api/market/history/${symbol}?timeframe=${tf}`)
       .then((r) => r.json())
       .then((data) => {
         if (cancelled || !candleRef.current) return;
