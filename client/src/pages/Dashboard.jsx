@@ -8,7 +8,7 @@ import OrderBook from '../components/OrderBook.jsx';
 import RecentTrades from '../components/RecentTrades.jsx';
 import { useAuth } from '../lib/auth.jsx';
 import { getSocket } from '../lib/socket.js';
-import { api } from '../lib/api.js';
+import { api, API_BASE } from '../lib/api.js';
 
 export default function Dashboard() {
   const { token } = useAuth();
@@ -77,7 +77,7 @@ export default function Dashboard() {
   useEffect(() => {
     const s = getSocket(token);
     s.emit('subscribe-book', selected);
-    fetch(`/api/market/orderbook/${selected}`).then((r) => r.json()).then(setBook);
+    fetch(`${API_BASE}/api/market/orderbook/${selected}`).then((r) => r.json()).then(setBook);
   }, [selected, token]);
 
   const watchItems = useMemo(
