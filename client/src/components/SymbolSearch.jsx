@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { api } from '../lib/api.js';
+import { api, API_BASE } from '../lib/api.js';
 import { useAuth } from '../lib/auth.jsx';
 
 export default function SymbolSearch({ onSelect }) {
@@ -10,7 +10,7 @@ export default function SymbolSearch({ onSelect }) {
   const wrapRef = useRef(null);
 
   useEffect(() => {
-    fetch('/api/market/symbols').then((r) => r.json()).then(setAll).catch(() => {});
+    fetch(`${API_BASE}/api/market/symbols`).then((r) => r.json()).then(setAll).catch(() => {});
   }, []);
 
   useEffect(() => {

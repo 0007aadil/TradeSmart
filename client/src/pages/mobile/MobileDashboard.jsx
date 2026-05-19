@@ -9,7 +9,7 @@ import RecentTrades from '../../components/RecentTrades.jsx';
 import CompanyLogo, { useCompanyProfile } from '../../components/CompanyLogo.jsx';
 import { useAuth } from '../../lib/auth.jsx';
 import { getSocket } from '../../lib/socket.js';
-import { api } from '../../lib/api.js';
+import { api, API_BASE } from '../../lib/api.js';
 
 function MarketListRow({ symbol, price, change, onClick, trailing }) {
   const profile = useCompanyProfile(symbol);
@@ -52,7 +52,7 @@ export default function MobileDashboard() {
 
   useEffect(() => {
     api('/portfolio/watchlist', { token }).then((rows) => setWatchSyms(rows.map((r) => r.symbol)));
-    fetch('/api/market/symbols').then((r) => r.json()).then(setAllSymbols).catch(() => {});
+    fetch(`${API_BASE}/api/market/symbols`).then((r) => r.json()).then(setAllSymbols).catch(() => {});
   }, [token]);
 
   // Read ?symbol= from URL to open detail view (e.g. from Portfolio click)
@@ -83,7 +83,7 @@ export default function MobileDashboard() {
     if (!selected) return;
     const s = getSocket(token);
     s.emit('subscribe-book', selected);
-    fetch(`/api/market/orderbook/${selected}`).then((r) => r.json()).then(setBook);
+    fetch(`${API_BASE}/api/market/orderbook/${selected}`).then((r) => r.json()).then(setBook);
   }, [selected, token]);
 
   const watchItems = useMemo(

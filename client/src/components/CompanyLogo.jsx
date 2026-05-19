@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_BASE } from '../lib/api.js';
 
 const profileCache = new Map();
 const profilePromises = new Map();
@@ -7,7 +8,7 @@ export function fetchProfile(symbol) {
   if (!symbol) return Promise.resolve(null);
   if (profileCache.has(symbol)) return Promise.resolve(profileCache.get(symbol));
   if (profilePromises.has(symbol)) return profilePromises.get(symbol);
-  const p = fetch(`/api/market/profile/${symbol}`)
+  const p = fetch(`${API_BASE}/api/market/profile/${symbol}`)
     .then((r) => r.json())
     .then((d) => { profileCache.set(symbol, d); profilePromises.delete(symbol); return d; })
     .catch(() => { profilePromises.delete(symbol); const fb = { symbol, name: symbol, logo: null }; profileCache.set(symbol, fb); return fb; });

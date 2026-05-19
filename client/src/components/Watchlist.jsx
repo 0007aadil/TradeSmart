@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api } from '../lib/api.js';
+import { api, API_BASE } from '../lib/api.js';
 import { useAuth } from '../lib/auth.jsx';
 import CompanyLogo from './CompanyLogo.jsx';
 
@@ -8,7 +8,7 @@ export default function Watchlist({ items, selected, onSelect, onRemoved, onAdde
   const [allSymbols, setAllSymbols] = useState([]);
 
   useEffect(() => {
-    fetch('/api/market/symbols').then((r) => r.json()).then(setAllSymbols).catch(() => {});
+    fetch(`${API_BASE}/api/market/symbols`).then((r) => r.json()).then(setAllSymbols).catch(() => {});
   }, []);
 
   async function remove(e, symbol) {
