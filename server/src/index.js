@@ -11,7 +11,10 @@ import { market, SYMBOLS } from './market.js';
 import { setIo } from './notify.js';
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || '*',
+  credentials: true,
+}));
 app.use(express.json());
 
 app.get('/api/health', (_, res) => res.json({ ok: true, symbols: SYMBOLS, mode: process.env.FINNHUB_API_KEY ? 'finnhub' : 'simulated' }));
