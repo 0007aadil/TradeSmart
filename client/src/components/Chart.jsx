@@ -16,7 +16,7 @@ function sma(data, period = 20) {
   return out;
 }
 
-export default function Chart({ symbol }) {
+export default function Chart({ symbol, isMobile = false }) {
   const hostRef = useRef(null);
   const chartRef = useRef(null);
   const candleRef = useRef(null);
@@ -122,7 +122,24 @@ export default function Chart({ symbol }) {
             color: b.close >= b.open ? 'rgba(38, 166, 154, 0.4)' : 'rgba(239, 83, 80, 0.4)',
           }))
         );
-        chartRef.current.timeScale().fitContent();
+
+        if (isMobile) {
+          // Per-timeframe visible bars so each timeframe looks distinct.
+          // Short timeframes (few bars) → fitContent (candles are big enough).
+          // Long timeframes → cap visible range so candles stay readable.
+          const mobileMaxBars = { '1D': 0, '1W': 0, '1M': 35, '3M': 50, '1Y': 65 };
+          const maxBars = mobileMaxBars[tf] || 0;
+          if (maxBars > 0 && clean.length > maxBars) {
+            chartRef.current.timeScale().setVisibleLogicalRange({
+              from: clean.length - maxBars,
+              to: clean.length - 1 + 2,
+            });
+          } else {
+            chartRef.current.timeScale().fitContent();
+          }
+        } else {
+          chartRef.current.timeScale().fitContent();
+        }
 
         if (clean.length > 0) {
           const last = clean[clean.length - 1];
@@ -139,45 +156,69 @@ export default function Chart({ symbol }) {
         }
       });
     return () => { cancelled = true; };
-  }, [symbol, tf]);
+  }, [symbol, tf, isMobile]);
 
   const up = (stats?.change ?? 0) >= 0;
 
   return (
-    <div className="panel chart-panel">
-      <div className="chart-overview">
-        <CompanyLogo symbol={symbol} size={44} />
-        <div className="chart-overview-text">
-          <div className="chart-overview-name">{profile?.name || symbol}</div>
-          <div className="chart-overview-sub">
-            <span className="chart-overview-tick">{symbol}</span>
-            {profile?.exchange && <span>· {profile.exchange}</span>}
-            {profile?.industry && <span>· {profile.industry}</span>}
-            {profile?.marketCap && <span>· Mkt Cap ${(profile.marketCap / 1000).toFixed(2)}B</span>}
+    <div className={`panel chart-panel ${isMobile ? 'is-mobile' : ''}`}>
+      {!isMobile && (
+        <div className="chart-overview">
+          <CompanyLogo symbol={symbol} size={44} />
+          <div className="chart-overview-text">
+            <div className="chart-overview-name">{profile?.name || symbol}</div>
+            <div className="chart-overview-sub">
+              <span className="chart-overview-tick">{symbol}</span>
+              {profile?.exchange && <span>· {profile.exchange}</span>}
+              {profile?.industry && <span>· {profile.industry}</span>}
+              {profile?.marketCap && <span>· Mkt Cap ${(profile.marketCap / 1000).toFixed(2)}B</span>}
+            </div>
           </div>
         </div>
-      </div>
-      <div className="chart-header">
-        <div className="chart-title">
+      )}
+      {isMobile ? (
+        <div className="chart-header-mobile">
+          <div className="chart-controls-mobile">
+            {TIMEFRAMES.map((t) => (
+              <button
+                key={t}
+                className={tf === t ? 'active' : ''}
+                onClick={() => setTf(t)}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
           {stats && (
-            <>
-              <div className="chart-price">${stats.price.toFixed(2)}<span className="chart-cur"> USD</span></div>
-              <div className={`chart-change ${up ? 'up' : 'down'}`}>
-                {up ? '▲' : '▼'} {up ? '+' : ''}{stats.change.toFixed(2)} ({up ? '+' : ''}{stats.pct.toFixed(2)}%)
-              </div>
-              <div className="chart-meta">
-                <span>H ${stats.high.toFixed(2)}</span>
-                <span>L ${stats.low.toFixed(2)}</span>
-              </div>
-            </>
+            <div className="chart-meta-mobile">
+              <span>High: <strong>${stats.high.toFixed(2)}</strong></span>
+              <span>Low: <strong>${stats.low.toFixed(2)}</strong></span>
+            </div>
           )}
         </div>
-        <div className="chart-controls">
-          {TIMEFRAMES.map((t) => (
-            <button key={t} className={tf === t ? 'active' : ''} onClick={() => setTf(t)}>{t}</button>
-          ))}
+      ) : (
+        <div className="chart-header">
+          <div className="chart-title">
+            {stats && (
+              <>
+                <div className="chart-price">${stats.price.toFixed(2)}<span className="chart-cur"> USD</span></div>
+                <div className={`chart-change ${up ? 'up' : 'down'}`}>
+                  {up ? '▲' : '▼'} {up ? '+' : ''}{stats.change.toFixed(2)} ({up ? '+' : ''}{stats.pct.toFixed(2)}%)
+                </div>
+                <div className="chart-meta">
+                  <span>H ${stats.high.toFixed(2)}</span>
+                  <span>L ${stats.low.toFixed(2)}</span>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="chart-controls">
+            {TIMEFRAMES.map((t) => (
+              <button key={t} className={tf === t ? 'active' : ''} onClick={() => setTf(t)}>{t}</button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       <div className="chart-legend">
         <span className="dot" style={{ background: '#ff9800' }} /> SMA 20
         <span className="dot" style={{ background: 'rgba(41, 98, 255, 0.6)', marginLeft: 12 }} /> Volume

@@ -234,7 +234,7 @@ export default function MobileDashboard() {
             ))}
           </div>
           <div className="mdetail-body">
-            {detailTab === 'chart' && <div className="mdetail-chart"><Chart symbol={selected} /></div>}
+            {detailTab === 'chart' && <div className="mdetail-chart"><Chart symbol={selected} isMobile={true} /></div>}
             {detailTab === 'book' && <OrderBook book={book} />}
             {detailTab === 'trades' && <RecentTrades trades={trades.filter((t) => t.symbol === selected)} />}
           </div>
